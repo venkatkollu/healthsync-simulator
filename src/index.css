@@ -145,4 +145,20 @@
     );
     background-size: 1000px 100%;
   }
+  
+  /* Alert toast styling */
+  .alert-toast {
+    @apply shadow-lg;
+  }
+  
+  /* SMS Alert animation */
+  @keyframes sms-send {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  .sms-send-animation {
+    animation: sms-send 0.5s ease-out forwards;
+  }
 }

@@ -10,6 +10,7 @@ import {
   EmergencyContact,
   getDefaultEmergencyContacts
 } from '../utils/simulationUtils';
+import { sendAlertToContacts } from '../utils/alertUtils';
 
 type SimulationScenario = 'normal' | 'stress' | 'critical' | 'random';
 
@@ -74,6 +75,20 @@ export function useSimulation() {
             duration: 10000
           });
           
+          // Send real-time alerts to contacts for critical events
+          if (prev.emergencyContacts.some(c => c.notify)) {
+            // Only attempt to send if there are enabled contacts
+            sendAlertToContacts(
+              prev.emergencyContacts.filter(c => c.notify),
+              notification.message
+            ).then(notifiedContacts => {
+              console.log(`Successfully sent alerts to ${notifiedContacts.length} contacts`);
+            }).catch(error => {
+              console.error('Failed to send alerts:', error);
+              toast.error('Failed to send some alerts. Please try again.');
+            });
+          }
+          
           // If there are contacts to notify, show an additional toast
           if (notification.sentToContacts && notification.sentToContacts.length > 0) {
             const contactNames = notification.sentToContacts.map(c => c.name).join(', ');
@@ -111,6 +126,22 @@ export function useSimulation() {
       if (newRunning && !intervalRef.current) {
         // Start the interval to generate data every 2 seconds
         intervalRef.current = window.setInterval(addDataPoint, 2000);
+        
+        // If starting simulation with critical scenario, send a test alert
+        if (prev.scenario === 'critical') {
+          const enabledContacts = prev.emergencyContacts.filter(c => c.notify);
+          if (enabledContacts.length > 0) {
+            toast.info('Simulation started with critical heart rate scenario - sending test alerts');
+            
+            // Delay slightly to let the toast above show first
+            setTimeout(() => {
+              sendAlertToContacts(
+                enabledContacts,
+                "SIMULATION TEST: Critical heart rate detected. This is a test message."
+              );
+            }, 1000);
+          }
+        }
       } else if (!newRunning && intervalRef.current) {
         // Clear the interval when stopping
         clearInterval(intervalRef.current);

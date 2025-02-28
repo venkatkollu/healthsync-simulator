@@ -4,6 +4,8 @@ import { Phone, Mail, X, Plus, Send, Check } from 'lucide-react';
 import { EmergencyContact } from '../utils/simulationUtils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { sendAlertToContacts } from '@/utils/alertUtils';
+import { toast } from 'sonner';
 
 interface EmergencyContactsProps {
   contacts: EmergencyContact[];
@@ -18,6 +20,7 @@ const EmergencyContacts: React.FC<EmergencyContactsProps> = ({ contacts, updateC
     value: '',
     notify: true
   });
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   const handleToggleNotify = (id: string) => {
     const updatedContacts = contacts.map(contact => 
@@ -52,6 +55,29 @@ const EmergencyContacts: React.FC<EmergencyContactsProps> = ({ contacts, updateC
     setIsAddingContact(false);
   };
 
+  const handleSendTestAlert = async () => {
+    const enabledContacts = contacts.filter(contact => contact.notify);
+    
+    if (enabledContacts.length === 0) {
+      toast.warning('No enabled contacts to send test alerts to');
+      return;
+    }
+    
+    setIsSendingTest(true);
+    try {
+      await sendAlertToContacts(
+        enabledContacts,
+        "TEST ALERT: This is a test message from the health monitoring system."
+      );
+      toast.success(`Test alerts sent to ${enabledContacts.length} contact(s)`);
+    } catch (error) {
+      console.error('Failed to send test alerts:', error);
+      toast.error('Failed to send test alerts. Please try again.');
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
   return (
     <div className="p-6 rounded-2xl bg-card/50 backdrop-blur-sm border shadow-sm animate-fade-in">
       <div className="flex flex-col gap-6">
@@ -61,15 +87,28 @@ const EmergencyContacts: React.FC<EmergencyContactsProps> = ({ contacts, updateC
             <p className="text-sm text-muted-foreground">People to notify during critical events</p>
           </div>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="gap-1"
-            onClick={() => setIsAddingContact(true)}
-          >
-            <Plus className="w-4 h-4" />
-            Add Contact
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-1"
+              onClick={handleSendTestAlert}
+              disabled={isSendingTest || contacts.filter(c => c.notify).length === 0}
+            >
+              <Send className="w-4 h-4" />
+              {isSendingTest ? 'Sending...' : 'Test Alert'}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-1"
+              onClick={() => setIsAddingContact(true)}
+            >
+              <Plus className="w-4 h-4" />
+              Add Contact
+            </Button>
+          </div>
         </div>
         
         <ScrollArea className="h-[240px] pr-4 -mr-4">

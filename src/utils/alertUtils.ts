@@ -27,17 +27,10 @@ export const sendAlertToContacts = async (
     const method = contact.contactType === 'phone' ? 'SMS' : 'Email';
     const icon = contact.contactType === 'phone' ? '📱' : '📧';
     
-    toast.success(
-      <div className="flex flex-col gap-1">
-        <div className="font-medium">Alert sent via {method}</div>
-        <div className="text-xs opacity-80">To: {contact.name} ({contact.value})</div>
-      </div>,
-      {
-        icon: <span className="text-xl">{icon}</span>,
-        duration: 5000,
-        className: "alert-toast"
-      }
-    );
+    toast.success(`${icon} Alert sent via ${method} to ${contact.name} (${contact.value})`, {
+      duration: 5000,
+      className: "alert-toast sms-send-animation"
+    });
     
     // In a real application, this would call an API to send the actual SMS or email
     console.log(`${method} alert to ${contact.name} (${contact.value}): ${message}`);

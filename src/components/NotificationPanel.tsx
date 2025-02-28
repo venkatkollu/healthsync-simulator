@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Bell, AlertTriangle, Info, X } from 'lucide-react';
-import { Notification, formatTime } from '../utils/simulationUtils';
+import { Bell, AlertTriangle, Info, X, Users } from 'lucide-react';
+import { Notification, formatTime, EmergencyContact } from '../utils/simulationUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NotificationPanelProps {
@@ -82,6 +82,16 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ notifications, ma
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatTime(notification.timestamp)}
                         </p>
+                        
+                        {/* Show contacts notified for critical alerts */}
+                        {notification.sentToContacts && notification.sentToContacts.length > 0 && (
+                          <div className="mt-2 flex items-center gap-1 text-xs border border-health-critical/20 bg-health-critical/5 px-2 py-1 rounded">
+                            <Users className="w-3 h-3 text-health-critical" />
+                            <span className="text-health-critical">
+                              Alert sent to {notification.sentToContacts.length} emergency contact{notification.sentToContacts.length > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -5,7 +6,9 @@ import {
   Notification, 
   generateSampleData, 
   generateNotification,
-  HeartRateStatus
+  HeartRateStatus,
+  EmergencyContact,
+  getDefaultEmergencyContacts
 } from '../utils/simulationUtils';
 
 type SimulationScenario = 'normal' | 'stress' | 'critical' | 'random';
@@ -18,6 +21,7 @@ interface SimulationState {
   currentHeartRate: number;
   currentStatus: HeartRateStatus;
   latestDataTimestamp: number;
+  emergencyContacts: EmergencyContact[];
 }
 
 export function useSimulation() {
@@ -28,7 +32,8 @@ export function useSimulation() {
     notifications: [],
     currentHeartRate: 70,
     currentStatus: 'NORMAL',
-    latestDataTimestamp: Date.now()
+    latestDataTimestamp: Date.now(),
+    emergencyContacts: getDefaultEmergencyContacts()
   });
   
   const intervalRef = useRef<number | null>(null);
@@ -55,7 +60,7 @@ export function useSimulation() {
       const newPoint = newDataPoints[0];
       
       // Check if we need to create a notification
-      const notification = generateNotification(newPoint);
+      const notification = generateNotification(newPoint, prev.emergencyContacts);
       let newNotifications = [...prev.notifications];
       
       if (notification) {
@@ -68,6 +73,19 @@ export function useSimulation() {
           toast.error(notification.message, {
             duration: 10000
           });
+          
+          // If there are contacts to notify, show an additional toast
+          if (notification.sentToContacts && notification.sentToContacts.length > 0) {
+            const contactNames = notification.sentToContacts.map(c => c.name).join(', ');
+            
+            toast.info(
+              `Emergency alert sent to: ${contactNames}`, 
+              {
+                duration: 8000,
+                icon: <span className="text-red-500">🚨</span>
+              }
+            );
+          }
         }
       }
       
@@ -128,6 +146,16 @@ export function useSimulation() {
     }));
   }, []);
   
+  // Update emergency contacts
+  const updateEmergencyContacts = useCallback((contacts: EmergencyContact[]) => {
+    setState(prev => ({
+      ...prev,
+      emergencyContacts: contacts
+    }));
+    
+    toast.success('Emergency contacts updated');
+  }, []);
+  
   // Clean up on unmount
   useEffect(() => {
     return () => {
@@ -142,6 +170,7 @@ export function useSimulation() {
     toggleSimulation,
     changeScenario,
     markNotificationAsRead,
+    updateEmergencyContacts,
     addDataPoint
   };
 }

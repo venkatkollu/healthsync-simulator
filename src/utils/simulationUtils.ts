@@ -28,12 +28,21 @@ export interface DataPoint {
   };
 }
 
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  contactType: 'phone' | 'email';
+  value: string;
+  notify: boolean;
+}
+
 export interface Notification {
   id: string;
   type: 'INFO' | 'WARNING' | 'ALERT';
   message: string;
   timestamp: number;
   read: boolean;
+  sentToContacts?: EmergencyContact[];
 }
 
 // Function to determine heart rate status
@@ -92,8 +101,40 @@ export const generateSampleData = (
   return data;
 };
 
+// Generate default emergency contacts
+export const getDefaultEmergencyContacts = (): EmergencyContact[] => [
+  {
+    id: 'contact-1',
+    name: 'Dr. Sarah Johnson',
+    contactType: 'phone',
+    value: '+1 (555) 123-4567',
+    notify: true
+  },
+  {
+    id: 'contact-2',
+    name: 'Emergency Services',
+    contactType: 'phone',
+    value: '911',
+    notify: true
+  },
+  {
+    id: 'contact-3',
+    name: 'Family Member',
+    contactType: 'phone',
+    value: '+1 (555) 987-6543',
+    notify: true
+  },
+  {
+    id: 'contact-4',
+    name: 'Medical Alert Service',
+    contactType: 'email',
+    value: 'alerts@medicalalert.example.com',
+    notify: false
+  }
+];
+
 // Generate a notification based on heart rate status
-export const generateNotification = (dataPoint: DataPoint): Notification | null => {
+export const generateNotification = (dataPoint: DataPoint, contacts: EmergencyContact[]): Notification | null => {
   if (dataPoint.status === 'ELEVATED') {
     return {
       id: `notification-${dataPoint.id}`,
@@ -105,12 +146,16 @@ export const generateNotification = (dataPoint: DataPoint): Notification | null 
   }
   
   if (dataPoint.status === 'CRITICAL') {
+    // For critical alerts, include which contacts would be notified
+    const notifyContacts = contacts.filter(contact => contact.notify);
+    
     return {
       id: `notification-${dataPoint.id}`,
       type: 'ALERT',
       message: `CRITICAL: Abnormal heart rate detected: ${dataPoint.heartRate} bpm. Medical attention required.`,
       timestamp: Date.now(),
-      read: false
+      read: false,
+      sentToContacts: notifyContacts.length > 0 ? notifyContacts : undefined
     };
   }
   

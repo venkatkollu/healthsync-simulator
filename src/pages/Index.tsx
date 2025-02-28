@@ -6,6 +6,7 @@ import SystemArchitecture from '@/components/SystemArchitecture';
 import DeviceSimulator from '@/components/DeviceSimulator';
 import NotificationPanel from '@/components/NotificationPanel';
 import DataFlow from '@/components/DataFlow';
+import EmergencyContacts from '@/components/EmergencyContacts';
 import { useSimulation } from '@/hooks/useSimulation';
 import { getSystemNodes } from '@/utils/simulationUtils';
 
@@ -53,8 +54,14 @@ const Index = () => {
               changeScenario={simulation.changeScenario}
             />
             
+            {/* Emergency Contacts */}
+            <EmergencyContacts 
+              contacts={simulation.emergencyContacts}
+              updateContacts={simulation.updateEmergencyContacts}
+            />
+            
             {/* Notifications Panel */}
-            <div className="h-[calc(100vh-28rem)]">
+            <div className="h-[calc(100vh-40rem)]">
               <NotificationPanel 
                 notifications={simulation.notifications}
                 markAsRead={simulation.markNotificationAsRead}

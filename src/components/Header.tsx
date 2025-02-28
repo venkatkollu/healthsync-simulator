@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Motion, Heart, Activity } from 'lucide-react';
+import { Activity, Heart, Zap } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
     <header className="w-full py-6 px-8 flex items-center justify-between border-b backdrop-blur-sm bg-background/80 sticky top-0 z-50 transition-all duration-300">
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 text-primary">
-          <Motion className="w-5 h-5" />
+          <Zap className="w-5 h-5" />
         </div>
         <div>
           <h1 className="text-xl font-semibold tracking-tight">HealthSync</h1>

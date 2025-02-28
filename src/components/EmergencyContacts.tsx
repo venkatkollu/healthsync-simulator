@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Phone, Mail, X, Plus, Send, Check } from 'lucide-react';
+import { Phone, Mail, X, Plus, Send, Check, Info } from 'lucide-react';
 import { EmergencyContact } from '../utils/simulationUtils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -53,6 +53,8 @@ const EmergencyContacts: React.FC<EmergencyContactsProps> = ({ contacts, updateC
       notify: true
     });
     setIsAddingContact(false);
+    
+    toast.success(`New ${contact.contactType} contact added: ${contact.name}`);
   };
 
   const handleSendTestAlert = async () => {
@@ -65,11 +67,22 @@ const EmergencyContacts: React.FC<EmergencyContactsProps> = ({ contacts, updateC
     
     setIsSendingTest(true);
     try {
+      toast.info('Sending test alerts to all enabled contacts...');
+      
       await sendAlertToContacts(
         enabledContacts,
         "TEST ALERT: This is a test message from the health monitoring system."
       );
+      
       toast.success(`Test alerts sent to ${enabledContacts.length} contact(s)`);
+      
+      // Show additional help info
+      if (enabledContacts.some(c => c.contactType === 'email')) {
+        toast.info(
+          'Note: This is a simulation - no real emails are sent. Check browser console (F12) to see the email content.',
+          { duration: 8000 }
+        );
+      }
     } catch (error) {
       console.error('Failed to send test alerts:', error);
       toast.error('Failed to send test alerts. Please try again.');
@@ -254,10 +267,18 @@ const EmergencyContacts: React.FC<EmergencyContactsProps> = ({ contacts, updateC
         </ScrollArea>
         
         <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
-          <p>
-            During critical health events, notifications will be sent to all enabled contacts.
-            Toggle contacts on/off to control who receives alerts.
-          </p>
+          <div className="flex gap-2 items-start">
+            <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <div>
+              <p className="mb-1">
+                <strong>Simulation Mode:</strong> This demo simulates sending alerts. No real SMS or emails are sent.
+              </p>
+              <p>
+                Try adding your own email address and selecting the "Critical" scenario before starting the simulation 
+                or click the "Test Alert" button to see how notifications would be sent.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
